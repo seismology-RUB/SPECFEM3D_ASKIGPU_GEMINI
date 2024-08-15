@@ -1,0 +1,4 @@
+The following changes were applied:
+
+- howto_aski_on_gpu.txt: updated documentation of ASKI GPU implementation
+- adapted all involved files as described in howto-documentation

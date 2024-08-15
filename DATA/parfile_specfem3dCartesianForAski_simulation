@@ -1,0 +1,186 @@
+#------------------------------------------------------------------------
+#           parfile_specfem3dForASKI_simulation
+#
+#  Parameters required when running SPECFEM3D simulations for ASKI
+#  using the script run_specfem3dForASKI_simulation
+#-------------------------------------------------------------------------
+#
+#  ASKI main parameter file of inversion
+#
+   main_parfile = ../main_parfile_alparray-80-60-30-0.1Hz
+#-------------------------------------------------------
+#  log file name, will be written to OUTPUT_FILES_PATH
+#
+   logfile = run_specfem3dCartesianForASKI_simulations.log
+#--------------------------------------------------------
+#  Parallel SPECFEM job specifications
+#  Fortran compier version
+#
+   gforversion = 6.3
+#--------------------------------------------------------------------------------
+#  library path to HDF, string gforversion will be replaced by value in script
+#
+   ldlibpath = /rscratch/minos01/wolle/for-gfortran-gforversion/hdf5-1.10.5/hdf5/lib
+#------------------------------------------------------------------------------------
+#  path to SPECFEM binaries
+# 
+   specfem_execpath = /home/wolle/work_git/specfemSourceWithGemini/bin/
+#--------------------------------------------------------------------------------------
+# resources for memory, virtual memory (vmem) and free scratch in GBytes
+#
+   job_resources = 2 2 10 
+#--------------------------------------------------------------------------------------
+#  say, if ASKI inversion volume, which is used in SPECFEM,
+#  should be defined by the inversion grid 
+#  definition of the current inversion grid (if possible)
+#
+   define_ASKI_output_volume_by_inversion_grid = False
+#-----------------------------------------------------------------------------------------
+#  say if only ASKI main file is produced to ckeck inversion grid and background model
+#  and then abort the simulation
+#
+   ASKI_main_file_only = False
+#-----------------------------------------------------------------------------------------
+#  say if a separate ASKI main file should be written for each simulation ('simulations'),
+#  i.e. for each event for kernel_displ or each station_component for kernel_gt,
+#  or just a single time ('once'). The file name
+#  is chosen automatically according to your choice here.
+#
+   write_ASKI_main_file = once
+#-----------------------------------------------------------------------------------------
+#  OUTPUT_FILES_PATH and IN_DATA_FILES_PATH (as defined in SPECFEM3D/src/shared/constants.h, 
+#  and Par_file, BUT relative to the current path, where this script is run)
+#
+   OUTPUT_FILES_PATH = OUTPUT_FILES/
+   LOCAL_PATH = DATABASES_MPI/
+   IN_DATA_FILES_PATH = DATA/
+#--------------------------------------------------------------------------------
+#  NSTEP and DT (in s) for Specfem computations
+#
+   NSTEP = 1800
+   DT = 0.14
+#---------------------------------------------------------------------------------
+#  to use alt in ASKI station file as true vertical coordinate in SPECFEM's
+#  cartesian coordinate system, set USE_SOURCES_RECEIVERS_Z to true
+#
+   USE_SOURCES_RECEIVERS_Z = .true.
+#---------------------------------------------------------------------------
+#  spherical coordinates of center of SPECFEM simulation box
+#
+   BOX_CENTER = 46.2 10.87
+#---------------------------------------------------------------------------------------
+#  ASKI may use source time function for deconvolution, and uses file printed by SPECFEM
+#
+   PRINT_SOURCE_TIME_FUNCTION = .true.
+#--------------------------------------------------------------------------------------------------
+#            D E F I N E     O R D E R    of    S I M U L A T I O N S
+#
+#  by strings displ_simulations, gt_simulations, measured_data_simulations
+#  in the following way:
+#
+#  displ_simulations:
+#         defines the events for which kernel_displacement output for ASKI is computed, 
+#  gt_simulations:
+#         defines the (components of) stations for which kernel_green_tensor output for ASKI is computed,
+#  measured_data_simulations:
+#         defines the events for which synthetically calculated "measured_data" (i.e. test data) can be computed
+#         (w.r.t a perturbed model) in case of pure synthetic test studies, these are regular SPECFEM3D simulations
+#         without producing any ASKI output. In general, these simulations are made separately from kernel
+#         simulations, as you will use a different model and do not need to compute ASKI output for kernels.
+#  disp_gemini_inject:
+#         specifies whether the incident wavefield is injected at the boundaries. Only applies to disp_simulations.
+#         Is not used for gt_simulations.
+#---------------------------------------------------------------------------
+#  displ_simulations must be of one of the following forms:
+#         displ_simulations = ''
+#              no kernel_displacement simulations will be done
+#         displ_simulations = 'all'
+#              in this case kernel_displacement output is computed for all events defined in FILE_EVENT_LIST
+#         displ_simulations = 'Source024,Source002,Source005'
+#              for all events in the ','-separated list of eventIDs (here 3 events: Source024, Source002 and Source005), 
+#              kernel_displacement output is computed (eventIDs must be present in FILE_EVENT_LIST)
+#         displ_simulations = 'all-except:S001,S002,S024'
+#              all events are taken into account, except the ones defined by the ','-separated list of eventIDs
+#              following the word 'all-except:'  (here all events except the three S001,S002 and S024)
+#              IF THERE IS ANY INVALID eventID (i.e. not present in FILE_EVENT_LIST), THIS SCRIPT WILL RAISE AN ERROR!
+#
+   displ_simulations = all
+#-----------------------------------------------------------------------
+#  disp_gemini_inject is either True or False:
+#         disp_gemini_inject = True
+#              Gemini injection is used to compute the incident wavefield. Source specifications in CMTSOLUTION
+#              are ignored. ASKI_DECONVOLVE_STF in Par_file_ASKI is set to .false.. SPECFEM Par_file is edited
+#              accordingly (setting GEMINI_EVENTID, COUPLE_WITH_INJECTION_TECHNIQUE and INJECTION_TECHNIQUE_TYPE).
+#         disp_gemini_inject = False:
+#              CMTSOLUTION is used to specify source. ASKI_DECONVOLVE_STF is set to '.true.'.
+#
+   disp_gemini_inject = True
+#--------------------------------------------------------------------------------------------------------
+#  traction_path: specifies the location of the seismograms to be injected relative to the run directory.
+#
+   traction_path = ./GEMINI/
+#---------------------------------------------------------------------
+#  Name of file with synthetic seismograms on boundary points
+#
+   gemini_synseis_file = specfem_coupling_synseis.hdf
+#---------------------------------------------------------------------------------------------------------
+#  gt_simulations must be of one of the following forms:
+#         gt_simulations = ''
+#              no kernel_green_tensor simulations will be done
+#         gt_simulations = 'all'
+#              in this case kernel_green_tensor output is computed for all stations defined in FILE_STATION_LIST for 
+#              all components defined by gt_components (see below for form of gt_components)
+#         gt_simulations = 'all-except:Geophone23,Geophone2'
+#              all stations are taken into account (at all components defined by gt_components), except the ones defined by 
+#              the ','-separated list of station names following the word 'all-except:' (here all stations excpet Geophone23 and Geophone2)
+#         gt_simulations = 'specific'
+#              in this case kernel_green_tensor output is computed for specific components of specific stations, BOTH
+#              defined by gt_components (see below for form of gt_components)
+#              IF THERE IS ANY INVALID station name (i.e. not present in FILE_STATION_LIST), THIS SCRIPT WILL RAISE AN ERROR!
+#
+   gt_simulations = all
+#----------------------------------------------------------------------------------------------------------
+#  gt_components must be of the following form in case of gt_simulations being 'all' or 'all-except:...' :
+#         gt_components = 'CX,CZ'
+#              a comma-separated list of valid components (the currently supported components are the global Cartesian 
+#              components 'CX','CY','CZ' and local vertical 'UP')
+#              IF THERE IS ANY INVALID COMPONENT, THIS SCRIPT WILL RAISE AN ERROR!
+#
+#  gt_components must be of the following form in case of gt_simulations being 'specific' :
+#         gt_components = 'Geophone23:CX,CY,CZ;Geophone2:CZ;ReceiverB:CY,CX'
+#              a ';'-separated list of entries consisting of the station name and ':' followed by a ','-separated list of 
+#              valid components. This defines the stations and the station-specific components for which this script
+#              computes Green functions. 
+#              IF THERE IS ANY INVALID COMPONENT, THIS SCRIPT WILL RAISE AN ERROR!
+#
+   gt_components = CZ
+#------------------------------------------------------------------------------------- 
+#  measured_data_simulations must be of the same form as displ_simulations (see above)
+#
+   measured_data_simulations = 
+#------------------------------
+# SPECFEM3D STATIONS file should be produced by ASKI (based on ASKI's stations file)
+#
+create_specfem_stations = True
+#-----------------------------------------------------------------
+# EMAILING LOGFILE SOMEWHERE
+#
+# set to False if no emails should be sent at all
+#
+send_emails = False
+#
+# email address, to which log notifications are sent
+#
+email_receiver= wolfgang.friederich@rub.de
+email_sender = wolfgang.friederich@rub.de
+#
+# if send_emails = True, the script always writes an email after the 1st iteration
+# and at the end of all iterations (or if script exits unintendedly)
+# number_of_intermediate_status_emails defines the number of additional emails in
+# between (1st and last iteration) while iterating over the simulations
+# set number_of_intermediate_status_emails = 0 if you do not want to receive
+# any additional emails aside from the two after 1st and last iteration
+#
+number_of_intermediate_status_emails = 0
+#-------------------------------------------------------------------------
+   

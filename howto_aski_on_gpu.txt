@@ -1,0 +1,41 @@
+How I brought the ASKI extensions on the GPU:
+   
+(1) In prepare_timerun.F90, I added a call to "prepare_ASKI_GPU"
+    which proceeds if COMPUTE_ASKI_OUPUT and ASKI_USES_GPU are true
+    and checks that ASKI_DFT_double is false,
+    ASKI_type_inversion_grid = 4 and ASKI_DFT_METHOD = EXPLICIT_SUMMATION. If not,
+    the run is stopped because deviating options are not implemented for the GPU.
+    
+    In "prepare_ASKI_GPU", the Cuda routine "prepare_constants_device_aski" is called
+    which is implemented in the file "prepare_mesh_constants_cuda.cu". There, the
+    Mesh pointer is extended by several ASKI variables needed later and copied to the GPU. 
+    The Mesh pointer itself and the additional variables are implemented in the file 
+    "mesh_constants_gpu.h".
+    The ASKI variables are: ASKI_np_local, ASKI_store_veloc, ASKI_nf, 
+                            d_ASKI_indx_local, d_ASKI_efactors_re, d_ASKI_efactors_im,
+                            d_ASKI_local_disp, d_ASKI_local_strain,
+                            d_ASKI_spectra_local_single_re, d_ASKI_spectra_local_single_im
+
+(2) After preparation, SPECFEM goes into the time loop and for each time step calls the
+    ASKI extension "write_ASKI_output" where the Fourier transform of displacements and strains
+    are updated. In "write_ASKI_output", first the Cuda routine "compute_aski_disp_strain_cuda.cu"
+    is called which itself calls the kernel routine "compute_aski_disp_strain_kernel.cu". 
+    The latter calculates displacements and strains on the wavefield points. Then,
+    the Fourier transform of displacements and strains are updated on the GPU using the
+    Cuda routine update_aski_spectra_cuda.cu and the kernel update_aski_spectra_kernel.cu.
+
+(3) When the iterations are done, SPECFEM transfers fields from the GPU to the CPU by calling
+    a transfer routine from "iterate_time.F90". I added a call to "it_transfer_ASKI_from_GPU"
+    to copy the displacement and strain spectra on the wavefield points back to the CPU onto
+    the variables "ASKI_spectra_local_single_re" and "ASKI_spectra_local_single_im". This routine
+    calls the Cuda routine "transfer_aski_spectra_from_device" implemented as an extern C function
+    in "transfer_fields_cuda.cu". After that, wavefield spectra are back on the CPU and ready
+    for output with "save_ASKI_output". 
+  
+(4) After that, SPECFEM cleans up the GPU arrays in "iterate_time.F90". I added a call there
+    to "it_cleanup_ASKI_GPU" which calls the CUDA routine "prepare_cleanup_device_aski"
+    implemented in "prepare_mesh_constants_cuda.cu".
+    
+(5) I created prototypes for kernel routines in kernel_proto.cu.h
+    and prototypes for external C routines in specfem3D_gpu_cuda_method_stubs.c 
+    by running Perl-Scripts in the utils folder

@@ -1,0 +1,17 @@
+# number of interfaces
+1
+#
+# We describe each interface below, structured as a 2D-grid, with several parameters : 
+# number of points along XI and ETA, minimal XI ETA coordinates 
+# and spacing between points which must be constant.
+# Then the records contain the Z coordinates of the NXI x NETA points.
+# WARNING: LONG_MIN and LAT_MIN and also SPACING must be consistent with Mesh_Par_File!
+#
+# interface number 1
+# SUPPRESS_UTM_PROJECTION  NXI  NETA    LONG_MIN   LAT_MIN    SPACING_XI     SPACING_ETA
+.true.                      81   61  -900000.0   -675000.0   22500.00000    22500.00000
+interface_01_zcoor.dat
+#
+# for each layer, we give the number of spectral elements in the vertical direction (begins with bottom
+# layer number 1
+30

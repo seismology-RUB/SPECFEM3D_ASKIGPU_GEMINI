@@ -1,0 +1,42 @@
+How can we loop over many CMTs, FORCES or injection events:
+
+The main code loops over injection setup, source setup, prepare timerun,
+iterate time and finalize simulation until all sources are done with.
+To this purpose, receiver setup and source setup have been separated.
+The main code calls setup_receivers_only and setup_sources_only.
+Variables related to mesh and receivers are not freed in finalize_simulation
+after each source. Only the variables changing with a new source are deallocated.
+
+Multiple sources that are treated sequentially by Specfem without reading the
+mesh database are enabled via the shared parameter MULTIPLE_SEQUENTIAL_SOURCES.
+
+An external python script creates a file that provides the source descriptions,
+i.e. variables defining the source, with one line per source. These could be
+variables needed for injection such as the GEMINI_SYNSEIS_FILE or variables
+defining a single force or a moment tensor source and also variables needed
+by ASKI.
+
+This file is read in initialize_simulation.F90. Its name is provided
+in the Par_file through the variable SEQUENTIAL_SOURCES_DESCRIPTION_FILE.
+The descriptions are stored in the global variable <sequential_sources_description>.
+The current source has the index <current_sequential_source>.
+The number of sources is given by <num_sequential_sources>.
+
+The loop in the main code is controlled by the variable ANOTHER_SEQUENTIAL_SOURCE
+which becomes .false. if all sources have been dealt with.
+This parameter is also used to select what is deallocated in finalize_simulation.
+
+The parameter SEQUENTIAL_SOURCES_MODE (1=CMT, 2=FORCE, 3=injection) decides whether
+we loop over CMTs, forces or injections:
+- For injections, the source description is extracted in couple_with_injection_prepare_gemini
+  by calling the routine <get_sequential_injection>. Other coupling methods are not yet supported.
+  Since this routine runs on all processes, broadcasting is not necessary.
+- For CMTs and forces, the source description is extracted in locate_source by calling the
+  routines get_sequential_force or get_sequential_cmt. There also broadcasting of the source
+  info is done.
+
+Hereafter, the time loop is carried out and finalize_simulation is called. There,
+if MULTIPLE_SEQUENTIAL_SOURCES is on, the counter <current_sequential_source> is
+increased by 1 and ANOTHER_SEQUENTIAL_SOURCE is set to true
+if current_sequential_source < num_sequential_source, or to false if not,
+If MULTIPLE_SEQUENTIAL_SOURCES is off, ANOTHER_SEQUENTIAL_SOURCE is set to false.
