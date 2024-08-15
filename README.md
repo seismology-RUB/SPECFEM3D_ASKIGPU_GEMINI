@@ -10,7 +10,7 @@ for injection at the boundaries of the SPECFEM mesh allowing hybrid forward mode
 through regional domains. Computation of Fourier coefficients at selected frequencies is done on the fly during
 the SPECFEM time loop and can optionally be carried out on the GPU.
 
-An detailed documentation on how to use this version of `SPECFEM` together with `ASKI` and `GEMINI` provided with the 
+A detailed documentation on how to use this version of `SPECFEM` together with `ASKI` and `GEMINI` is provided with the 
 [ASKI software](https://github.com/seismology-RUB/ASKI_SEM3D_GEMINI). 
 Python scripts helping with organising SPECFEM runs can also be found there.
 
