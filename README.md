@@ -17,7 +17,7 @@ Python scripts helping with organising SPECFEM runs can also be found there.
 This branch was initiated from a clone of SPECFEM at **commit `e4e07edc` on March 25, 2020**.
 
 ### Contributors: 
-Wolfgang Friederich, Thomas Möller, Manuel Ditz, Kasper D. Fischer
+Wolfgang Friederich, Thomas Möller, Manuel Ditz, Kasper D. Fischer, Florian Schumacher (Schorn)
 
 ## Modifications, adaptations and extensions
 
@@ -30,7 +30,7 @@ Wolfgang Friederich, Thomas Möller, Manuel Ditz, Kasper D. Fischer
 - Storing of displacement fields for all events and Green functions for all receivers on disk at the high sampling rate used by SPECFEM 
 requires a prohibitively vast amount of disk space. Therefore, these data are compressed by carrying out a Fourier transform at selected 
   frequencies only which is done on the fly while `SPECFEM` assembles time samples of the wavefields. This extension of `SPECFEM` was 
-  already coded by [Schumacher and Friederich, (2016)](https://doi.org/10.1093/gji/ggv505) for parallel execution on CPUs and was now ported for execution on GPUs. The final output of the extended and modified version of SPECFEM are the Fourier transformed wavefields at the GLL-points of the `SPECFEM` mesh (displacements and strains) and also synthetic seismograms at all receiver positions.
+  already coded by [Florian Schumacher](https://github.com/seismology-RUB/SPECFEM3D_Cartesian_for_ASKI) for parallel execution on CPUs and was now ported for execution on GPUs. The final output of the extended and modified version of SPECFEM are the Fourier transformed wavefields at the GLL-points of the `SPECFEM` mesh (displacements and strains) and also synthetic seismograms at all receiver positions.
 
 ------------------------------------------------------------------------------
 Here follows the content of the original README file of the SPECFEM repository:
