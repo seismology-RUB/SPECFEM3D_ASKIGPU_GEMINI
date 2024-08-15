@@ -1,6 +1,8 @@
 
 # SPECFEM3D_ASKIGPU_GEMINI
 
+[![DOI](https://zenodo.org/badge/842860805.svg)](https://zenodo.org/doi/10.5281/zenodo.13327558)
+
 This is a version of [SPECFEM3D Cartesian](https://github.com/SPECFEM/specfem3d) that is able to produce
 Fourier transformed wavefield output for later use in seismic full waveform inversion 
 with the [ASKI software](https://github.com/seismology-RUB/ASKI_SEM3D_GEMINI).
